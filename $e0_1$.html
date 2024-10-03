@@ -1,0 +1,31 @@
+<html><head><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"></script><script charset="utf-8" src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script><script>
+MathJax.Hub.Config({
+  showProcessingMessages: false,
+  tex2jax: { inlineMath: [['$','$'],['\(','\)']] }
+});
+async function resizeAll(){
+  let o=document.querySelector('.tabs__radio:checked')
+  let ts=document.querySelectorAll('.tabs__radio')
+  for (let t of ts) {
+    t.checked = true
+    let g = document.querySelector('.tabs__radio:checked ~ .tabs__content')
+    let k = g.querySelector('.plotly-graph-div')
+    if (k) await Plotly.Plots.resize(k);
+  }
+  o.checked = true;
+}
+function debounce(fn, wait) {
+  let timeout;
+  return function executedFn(...args){
+    const later = () => { clearTimeout(timeout); fn(...args); }
+    clearTimeout(timeout)
+    timeout = setTimeout(later, wait);
+  }
+}
+window.onresize = debounce(resizeAll, 250)
+window.onload = resizeAll
+</script><link href="https://fonts.googleapis.com/css?family=Inter" rel="stylesheet" type="text/css"><link rel="stylesheet" href="tabs.css"></head><body><div class="tabs">
+<input type="radio" class="tabs__radio" name="tabset" id="tab0" checked><label for="tab0" class="tabs__label">$f_X$</label><div class="tabs__content"><div>                            <div id="d798f935-ea78-4b57-aaef-61c7f749dc02" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("d798f935-ea78-4b57-aaef-61c7f749dc02")) {                    Plotly.newPlot(                        "d798f935-ea78-4b57-aaef-61c7f749dc02",                        [{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"y":[0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05,0.05],"type":"bar","hovertemplate":"\u2265%{x}: %{y}"}],                        {"template":{"layout":{"colorway":["rgb(127, 60, 141)","rgb(17, 165, 121)","rgb(57, 105, 172)","rgb(242, 183, 1)"],"hovermode":"x unified","margin":{"b":30,"l":55,"r":50,"t":35},"title":{"font":{"family":"'Inter', sans-serif","size":18}},"yaxis":{"hoverformat":".1%","tickformat":".0%"}}},"font":{"family":"'Inter', sans-serif"},"title":{"yanchor":"top","y":0.95,"text":"$\\dfrac{1}{20}$"},"yaxis":{"title":{"text":"$P(X = x)$"},"range":[0,1]},"xaxis":{"title":{"text":"$x$"}}},                        {"responsive": false, "displayModeBar": false}                    )                };                            </script>        </div></div>
+<input type="radio" class="tabs__radio" name="tabset" id="tab1" ><label for="tab1" class="tabs__label">$F_X$</label><div class="tabs__content"><div>                            <div id="2b5ba0bb-93ba-44e3-8897-6f8749808446" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("2b5ba0bb-93ba-44e3-8897-6f8749808446")) {                    Plotly.newPlot(                        "2b5ba0bb-93ba-44e3-8897-6f8749808446",                        [{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"y":[0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95,1.0],"type":"bar","hovertemplate":"\u2265%{x}: %{y}"}],                        {"template":{"layout":{"colorway":["rgb(127, 60, 141)","rgb(17, 165, 121)","rgb(57, 105, 172)","rgb(242, 183, 1)"],"hovermode":"x unified","margin":{"b":30,"l":55,"r":50,"t":35},"title":{"font":{"family":"'Inter', sans-serif","size":18}},"yaxis":{"hoverformat":".1%","tickformat":".0%"}}},"font":{"family":"'Inter', sans-serif"},"title":{"yanchor":"top","y":0.95,"text":"$\\dfrac{x}{20}$"},"yaxis":{"title":{"text":"$P(X \\le x)$"},"range":[0,1]},"xaxis":{"title":{"text":"$x$"}}},                        {"responsive": false, "displayModeBar": false}                    )                };                            </script>        </div></div>
+<input type="radio" class="tabs__radio" name="tabset" id="tab2" ><label for="tab2" class="tabs__label">$\bar{F}_X$</label><div class="tabs__content"><div>                            <div id="ccbc56e6-46f9-4ded-9218-5f90e75341ed" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script type="text/javascript">                                    window.PLOTLYENV=window.PLOTLYENV || {};                                    if (document.getElementById("ccbc56e6-46f9-4ded-9218-5f90e75341ed")) {                    Plotly.newPlot(                        "ccbc56e6-46f9-4ded-9218-5f90e75341ed",                        [{"x":[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],"y":[1.0,0.95,0.9,0.85,0.8,0.75,0.7,0.65,0.6,0.55,0.5,0.45,0.4,0.35,0.3,0.25,0.2,0.15,0.1,0.05],"type":"bar","hovertemplate":"\u2265%{x}: %{y}"}],                        {"template":{"layout":{"colorway":["rgb(127, 60, 141)","rgb(17, 165, 121)","rgb(57, 105, 172)","rgb(242, 183, 1)"],"hovermode":"x unified","margin":{"b":30,"l":55,"r":50,"t":35},"title":{"font":{"family":"'Inter', sans-serif","size":18}},"yaxis":{"hoverformat":".1%","tickformat":".0%"}}},"font":{"family":"'Inter', sans-serif"},"title":{"yanchor":"top","y":0.95,"text":"$\\dfrac{21-x}{20}$"},"yaxis":{"title":{"text":"$P(X \\ge x)$"},"range":[0,1]},"xaxis":{"title":{"text":"$x$"}}},                        {"responsive": false, "displayModeBar": false}                    )                };                            </script>        </div></div>
+</div></body></html>
