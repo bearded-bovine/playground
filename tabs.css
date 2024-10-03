@@ -16,7 +16,7 @@ body {
 .tabs__label {
   padding: 5px 8px;
   cursor: pointer;
-  border: solid #009578;
+  border: solid #11a579;
   border-width: 1px 1px 0 1px;
   border-radius: 8px 8px 0 0;
   background-color: #fff;
@@ -33,14 +33,14 @@ body {
   order: 1;
   width: 100%;
   height: calc(100% - 34px);
-  border-top: 1px solid #009578;
+  border-top: 1px solid #11a579;
   line-height: 1.5;
   font-size: 0.9em;
   display: none;
 }
 
 .tabs__radio:checked + .tabs__label {
-  background-color: #009578;
+  background-color: #11a579;
   color: #fff;
 }
 
