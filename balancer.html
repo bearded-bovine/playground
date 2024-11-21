@@ -1,0 +1,476 @@
+<head>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap');
+
+        *,
+        *::before,
+        *::after {
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            box-sizing: border-box;
+        }
+
+        input,
+        button,
+        textarea,
+        select {
+            font: inherit;
+        }
+
+        body {
+            font-family: "Noto Sans", sans-serif;
+            padding: 40px;
+            background-color: #1d232a;
+            color: #e5e5e5;
+            color-scheme: dark;
+        }
+
+        .balancer {
+            user-select: none;
+        }
+
+        .equalizer {
+            display: flex;
+            width: 396px;
+        }
+
+        .stat-slider {
+            display: flex;
+            flex-direction: column;
+            text-align: center;
+            margin: 5px;
+        }
+
+        input[type=range] {
+            accent-color: #459b43;
+            writing-mode: vertical-lr;
+            direction: rtl;
+            vertical-align: middle;
+            height: 130px;
+        }
+
+        input[type=number] {
+            width: 56px;
+            height: 1.8em;
+            font-size: large;
+            text-align: right;
+            background-color: #3b3b3b;
+            border: 1px solid #e5e5e5;
+            color: #e5e5e5;
+            border-radius: 3px;
+        }
+
+        input[type=number].on {
+            border: 1px solid #af7aeb;
+            outline: 2px solid #af7aeb;
+        }
+
+        output {
+            background-image: url("d20_off.png");
+            background-size: 56px 64px;
+            width: 56px;
+            height: 64px;
+            line-height: 64px;
+        }
+
+        output.on {
+            background-image: url("d20_on.png")
+        }
+
+        .lrr_select {
+            margin-top: 20px;
+            width: 396px;
+            text-align: center;
+        }
+
+        .lrr_select label {
+            font-style: italic;
+        }
+
+        .results {
+            visibility: hidden;
+            margin-top: 20px;
+            height: 200px;
+            overflow-y: auto;
+            overflow-x: hidden;
+            width: min-content;
+        }
+
+        table {
+            border-collapse: collapse;
+            border: 0;
+            width: 396px;
+            text-align: center;
+        }
+
+        th {
+            font-size: small;
+            position: sticky;
+            top: 0;
+            padding: .2em .5em .5em;
+            background-color: #1d232a;
+        }
+
+        td {
+            padding: .2em .5em;
+        }
+
+        tbody {
+            background-color: #171a1f;
+        }
+
+        tbody tr:hover {
+            background-color: #182722;
+        }
+
+        select {
+            min-width: 100px;
+            font-style: italic;
+            background-color: #3b3b3b;
+            border: 1px solid #e5e5e5;
+            color: #e5e5e5;
+            border-radius: 3px;
+        }
+
+        select>option {
+            background-color: #1d232a;
+        }
+
+        option:checked,
+        option:hover {
+            box-shadow: 0 0 10px 100px #3b0764 inset;
+        }
+    </style>
+    <script>
+
+        // Define how monsters scale by level / rank / role
+        const scaling_profile = {
+            ranks: ['minion', 'low', 'mid', 'high', 'boss', 'solo'],
+            scaledStats: {
+                hp: [
+                    level => 1 + 1 * level,
+                    level => 3 + 1.5 * level,
+                    level => 8 + 2 * level,
+                    level => 12 + 4 * level,
+                    level => 16 + 6 * level,
+                    level => 24 + 8 * level,
+                ],
+                pd: [
+                    level => 7 + 0.7 * level,
+                    level => 9 + 0.7 * level,
+                    level => 11 + 0.7 * level,
+                    level => 13 + 0.7 * level,
+                    level => 15 + 0.7 * level,
+                    level => 17 + 0.7 * level,
+                ],
+                md: [
+                    level => 4.25 + 0.7 * level,
+                    level => 6.25 + 0.7 * level,
+                    level => 8.25 + 0.7 * level,
+                    level => 10.25 + 0.7 * level,
+                    level => 12.25 + 0.7 * level,
+                    level => 14.25 + 0.7 * level,
+                ],
+                atk: [
+                    level => 2 + 0.7 * level,
+                    level => 3 + 0.7 * level,
+                    level => 3 + 0.7 * level,
+                    level => 3 + 0.7 * level,
+                    level => 4 + 0.7 * level,
+                    level => 5 + 0.7 * level,
+                ],
+                dmg: [
+                    level => 0.25 + 0.5 * level,
+                    level => 1.75 + 0.5 * level,
+                    level => 2.25 + 0.5 * level,
+                    level => 2.75 + 0.5 * level,
+                    level => 3.25 + 0.5 * level,
+                    level => 3.75 + 0.75 * level,
+                ],
+                ap: [
+                    level => 2 + 0 * level,
+                    level => 3 + 0 * level,
+                    level => 4 + 0 * level,
+                    level => 4 + 0 * level,
+                    level => 6 + 0 * level,
+                    level => 8 + 0 * level,
+                ],
+            },
+            roles: {
+                artillerist: { hp: 0.85, dmg: 0.5, pd: -1, md: 0 },
+                brute: { hp: 1.3, dmg: 0, pd: -2, md: -2 },
+                controller: { hp: 0.85, dmg: -0.5, pd: -1, md: 1 },
+                guardian: { hp: 1.15, dmg: -1, pd: 2, md: -1 },
+                leader: { hp: 1.15, dmg: -0.5, pd: 1, md: 1 },
+                lurker: { hp: 0.85, dmg: 0.5, pd: 1, md: -1 },
+                skirmisher: { hp: 1, dmg: 0, pd: 0, md: 0 },
+                support: { hp: 1, dmg: -1, pd: 0, md: 1 },
+            }
+        }
+
+        function stat_scaler(profile) {
+            const val2rank = {};
+            for (let level = 0; level <= 20; level++) {
+                for (const role in profile.roles) {
+                    const adjust = profile.roles[role];
+                    for (const stat in profile.scaledStats) {
+                        const lb = (stat === 'atk' || stat === 'dmg') ? 0 : 1;
+                        let y = profile.scaledStats[stat].map(fn => Math.max(lb, fn(level)));
+                        if (stat === 'hp') {
+                            y = y.map(v => v * (adjust[stat] || 1));
+                        } else {
+                            y = y.map(v => v + (adjust[stat] || 0));
+                        }
+                        val2rank[`${level},${role},${stat}`] = { vals: y, ranks: Array.from({ length: profile.ranks.length }, (_, i) => i) };
+                    }
+                }
+            }
+
+            function lerp(x, xs, ys) {
+                console.log("lerp:",x,xs,ys);
+                let i = 0;
+                while (i < xs.length - 2 && x > xs[i + 1]) i++;
+                const x0 = xs[i];
+                const x1 = xs[i + 1];
+                const y0 = ys[i];
+                const y1 = ys[i + 1];
+                return y0 + (y1 - y0) * ((x - x0) / (x1 - x0));
+            }
+
+            function cdf(x) {
+                x *= 1.3;
+                return 1 / (1 + Math.exp(-x));
+            }
+            function cdf_inv(x) {
+                x = Math.min(Math.max(x,.01),.99)
+                return Math.log(x / (1 - x)) / 1.3;
+            }
+
+            this.val_to_d20 = function ({ level, rank, role, ...stats }) {
+                const res = {};
+                rank = profile.ranks.indexOf(rank);
+                for (const stat in stats) {
+                    const v2r = val2rank[`${level},${role},${stat}`];
+                    const val = stats[stat];
+                    const l_lo = lerp(val - 0.5, v2r.vals, v2r.ranks);
+                    const l_hi = lerp(val + 0.5, v2r.vals, v2r.ranks);
+                    const q_lo = cdf(lerp(val - 0.5, v2r.vals, v2r.ranks) - rank);
+                    const q_hi = cdf(lerp(val + 0.5, v2r.vals, v2r.ranks) - rank);
+                    const q = Math.min(Math.max(0.5, q_lo), q_hi);
+                    console.log(' ',{stat:stat,q_lo:q_lo,q_hi:q_hi,val:val,l_lo:l_lo,l_hi:l_hi,v2r:v2r})
+                    res[stat] = Math.min(Math.max(Math.round(20 * q), 1), 20);
+                }
+                console.log("val->d20:",stats,res);
+                return res;
+            }
+            this.d20_to_val = function ({ level, rank, role, ...stats }) {
+                const res = {};
+                rank = profile.ranks.indexOf(rank);
+                for (const stat in stats) {
+                    const v2r = val2rank[`${level},${role},${stat}`];
+                    const q = stats[stat] / 20;
+                    const r = cdf_inv(q) + rank;
+                    const lb = (stat === 'atk' || stat === 'dmg') ? 0 : 1;
+                    res[stat] = Math.max(Math.round(lerp(r, v2r.ranks, v2r.vals)), lb);
+                }
+                console.log("d20->val:",stats,res);
+                return res;
+            }
+            this.val2rank = val2rank;
+
+            /*
+            function analyze(stats) {
+                const res = [];
+                for (let level = 0; level <= 20; level++) {
+                    for (let rank = 0; rank < 6; rank++) {
+                        for (const role in roles) {
+                            const statQuantiles = quantiles({ ...stats, level, rank, role });
+                            const score = Object.keys(statQuantiles).length - Object.values(statQuantiles).reduce((acc, q) => acc + (2 * q - 1) ** 2, 0);
+                            let tiebreak = -Math.abs(rank - midRank);
+                            if (role === 'Skirmisher') tiebreak += 1;
+                            res.push({ level, rank, role, score, tiebreak, ...statQuantiles });
+                        }
+                    }
+                }
+                return res.sort((a, b) => b.score - a.score || b.tiebreak - a.tiebreak).slice(0, 10);
+            }
+            */
+        }
+
+        function init_stat_inputs(stat, the_scaler) {
+            let $level = document.getElementById('level_select');
+            let $rank = document.getElementById('rank_select');
+            let $role = document.getElementById('role_select');
+            let $val = document.getElementById(stat + '_val');
+            let $slider = document.getElementById(stat + '_slider');
+            let $pct = document.getElementById(stat + '_pct');
+            let active = 'pct';
+
+            function activate(which) {
+                if (which === 'val') {
+                    $pct.classList.remove('on');
+                    $val.classList.add('on');
+                } else if (which === 'pct') {
+                    $pct.classList.add('on');
+                    $val.classList.remove('on');
+                } else {
+                    $pct.classList.remove('on');
+                    $val.classList.remove('on');
+                }
+                active = which;
+            }
+            function update_val() {
+                $val.value = the_scaler.d20_to_val({ level: $level.value, rank: $rank.value, role: $role.value, [stat]: parseInt($pct.value) })[stat];
+            }
+            function update_pct() {
+                $pct.value = $slider.value = the_scaler.val_to_d20({ level: $level.value, rank: $rank.value, role: $role.value, [stat]: parseInt($val.value) })[stat];
+            }
+            function recompute() {
+                if (active === 'pct') {
+                    update_val();
+                } else if (active === 'val') {
+                    update_pct();
+                }
+            }
+
+            $val.addEventListener('focusin', (e) => {
+                activate('val');
+            })
+            $val.addEventListener('input', (e) => {
+                update_pct();
+            });
+            $slider.addEventListener('input', (e) => {
+                $pct.value = $slider.value;
+                update_val();
+            });
+            $pct.addEventListener('click', (e) => {
+                activate('pct');
+            });
+            $pct.addEventListener('dblclick', (e) => {
+                activate('pct');
+                $pct.value = $slider.value = 10;
+                update_val();
+            })
+
+            $level.addEventListener('change', recompute);
+            $rank.addEventListener('change', recompute);
+            $role.addEventListener('change', recompute);
+
+            activate('pct');
+            recompute();
+        }
+
+        window.addEventListener("DOMContentLoaded", (e) => {
+            the_scaler = new stat_scaler(scaling_profile);
+            ['hp', 'pd', 'md', 'atk', 'dmg', 'ap'].forEach((s) => {
+                init_stat_inputs(s, the_scaler);
+            });
+        });
+
+    </script>
+</head>
+
+<body>
+
+    <div class="balancer">
+        <div class="equalizer">
+            <div class="stat-slider">
+                <div id="label">HP</div>
+                <input id="hp_val" type="number" min="1" />
+                <input type="range" id="hp_slider" value="10" min="1" max="20" />
+                <output id="hp_pct" for="hp_slider">10</output>
+            </div>
+            <div class="stat-slider">
+                <div id="label">PD</div>
+                <input id="pd_val" type="number" min="1" />
+                <input type="range" id="pd_slider" value="10" min="1" max="20" />
+                <output id="pd_pct" for="pd_slider">10</output>
+            </div>
+            <div class="stat-slider">
+                <div id="label">MD</div>
+                <input id="md_val" type="number" min="1" />
+                <input type="range" id="md_slider" value="10" min="1" max="20" />
+                <output id="md_pct" for="md_slider">10</output>
+            </div>
+            <div class="stat-slider">
+                <div id="label">Atk</div>
+                <input id="atk_val" type="number" min="0" />
+                <input type="range" id="atk_slider" value="10" min="1" max="20" />
+                <output id="atk_pct" for="atk_slider">10</output>
+            </div>
+            <div class="stat-slider">
+                <div id="label">Dmg</div>
+                <input id="dmg_val" type="number" min="0" />
+                <input type="range" id="dmg_slider" value="10" min="1" max="20" />
+                <output id="dmg_pct" for="dmg_slider">10</output>
+            </div>
+            <div class="stat-slider">
+                <div id="label">AP</div>
+                <input id="ap_val" type="number" min="1" />
+                <input type="range" id="ap_slider" value="10" min="1" max="20" />
+                <output id="ap_pct" for="ap_slider">10</output>
+            </div>
+        </div>
+        <div class="lrr_select">
+            <label>Level
+                <select id="level_select">
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                    <option value="15">15</option>
+                    <option value="16">16</option>
+                    <option value="17">17</option>
+                    <option value="18">18</option>
+                    <option value="19">19</option>
+                    <option value="20">20</option>
+                </select>
+            </label>
+            <select id="rank_select">
+                <option value="minion">Minion</option>
+                <option value="low">Low-Tier</option>
+                <option value="mid" selected>Mid-Tier</option>
+                <option value="high">High-Tier</option>
+                <option value="boss">Boss</option>
+                <option value="solo">Solo</option>
+            </select>
+            <select id="role_select">
+                <option value="artillerist">Artillerist</option>
+                <option value="brute">Brute</option>
+                <option value="controller">Controller</option>
+                <option value="guardian">Guardian</option>
+                <option value="leader">Leader</option>
+                <option value="lurker">Lurker</option>
+                <option value="skirmisher" selected>Skirmisher</option>
+                <option value="support">Support</option>
+            </select>
+        </div>
+        <div class="results">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Score</th>
+                        <th>Level</th>
+                        <th>Rank</th>
+                        <th>Role</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
